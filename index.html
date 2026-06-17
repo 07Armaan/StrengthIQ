@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StrengthIQ — Strength Gain Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E8393A;
+  --red-dim:#a02828;
+  --dark:#0A0A0A;
+  --surface:#141414;
+  --card:#1a1a1a;
+  --border:#252525;
+  --cream:#EDEBE6;
+  --muted:#666666;
+  --muted-lt:#999;
+}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--cream);font-family:'Inter',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:var(--red-dim);border-radius:2px}
+
+/* ─── NAV ─────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 56px;
+  background:rgba(10,10,10,0.85);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--cream);display:flex;align-items:center;gap:10px;
+}
+.logo-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:12px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;transition:color .25s;
+}
+.nav-links a:hover{color:var(--cream)}
+.nav-btn{
+  background:var(--red);color:#fff;border:none;
+  padding:10px 26px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:background .25s,transform .2s;
+}
+.nav-btn:hover{background:#c52e2e;transform:translateY(-1px)}
+
+/* ─── PAGE 1 ──────────────────────────────── */
+#page1{display:block}
+#page2{display:none}
+
+/* HERO */
+.hero{
+  min-height:100vh;position:relative;overflow:hidden;
+  display:flex;align-items:center;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 55% 70% at 75% 50%, rgba(232,57,58,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 20% 20%, rgba(232,57,58,0.05) 0%, transparent 55%),
+    var(--dark);
+}
+/* animated grid lines */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:grid-drift 20s linear infinite;
+  opacity:.6;
+}
+@keyframes grid-drift{from{background-position:0 0}to{background-position:60px 60px}}
+
+.hero-inner{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;max-width:1200px;margin:0 auto;
+  padding:140px 56px 80px;width:100%;
+}
+.hero-left{}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:var(--red);margin-bottom:28px;
+}
+.hero-tag-line{width:28px;height:1px;background:var(--red)}
+.hero-h1{
+  font-family:'Oswald',sans-serif;font-size:clamp(60px,8vw,108px);
+  font-weight:700;line-height:.9;letter-spacing:1px;
+  text-transform:uppercase;color:var(--cream);margin-bottom:28px;
+}
+.hero-h1 em{color:var(--red);font-style:normal}
+.hero-p{
+  font-size:15px;font-weight:300;line-height:1.8;
+  color:rgba(237,235,230,.55);max-width:440px;margin-bottom:40px;
+}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{
+  background:var(--red);color:#fff;border:none;
+  padding:15px 38px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);
+  transform:translateX(-100%);transition:transform .35s ease;
+}
+.btn-primary:hover::after{transform:translateX(0)}
+.btn-primary:hover{background:#c52e2e;transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,57,58,.35)}
+.btn-ghost{
+  background:transparent;color:var(--cream);
+  border:1px solid var(--border);padding:15px 38px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .25s;
+}
+.btn-ghost:hover{border-color:var(--red);color:var(--red)}
+
+/* hero right — animated gain meter */
+.hero-right{display:flex;justify-content:center;align-items:center}
+.gain-meter{
+  width:320px;background:var(--surface);border:1px solid var(--border);
+  padding:36px 32px;position:relative;
+}
+.gain-meter::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+  animation:shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer{0%,100%{opacity:.3}50%{opacity:1}}
+.meter-label{
+  font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:24px;
+}
+.meter-inputs{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.meter-row{display:flex;justify-content:space-between;align-items:center}
+.meter-key{font-size:12px;color:var(--muted);font-weight:400}
+.meter-val{font-size:12px;font-family:'Oswald',sans-serif;color:var(--cream);font-weight:500;letter-spacing:.5px}
+.meter-divider{height:1px;background:var(--border);margin:16px 0}
+.meter-output-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.meter-pct{
+  font-family:'Oswald',sans-serif;font-size:72px;font-weight:700;
+  color:var(--red);line-height:1;margin-bottom:16px;
+}
+.meter-pct span{font-size:28px;font-weight:400;color:var(--muted-lt)}
+.meter-bar-track{height:4px;background:var(--border);position:relative;overflow:hidden}
+.meter-bar-fill{
+  height:100%;background:var(--red);width:0;
+  animation:fill-bar 2.5s 1s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes fill-bar{to{width:72%}}
+.meter-sub{font-size:11px;color:var(--muted);margin-top:10px}
+
+/* STATS */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--border);
+}
+.stat{
+  padding:32px 40px;border-right:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.stat:last-child{border-right:none}
+.stat::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--red);transform:scaleX(0);transform-origin:left;
+  transition:transform .4s ease;
+}
+.stat:hover::after{transform:scaleX(1)}
+.stat-n{
+  font-family:'Oswald',sans-serif;font-size:44px;font-weight:700;
+  color:var(--red);line-height:1;
+}
+.stat-l{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+
+/* SECTIONS */
+.section{padding:96px 56px;max-width:1200px;margin:0 auto}
+.section-eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;
+  color:var(--red);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-eyebrow::before{content:'';width:24px;height:1px;background:var(--red)}
+.section-h2{
+  font-family:'Oswald',sans-serif;font-size:clamp(32px,4vw,58px);
+  font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--cream);line-height:1.05;margin-bottom:24px;
+}
+.section-p{
+  font-size:15px;font-weight:300;line-height:1.85;
+  color:rgba(237,235,230,.6);max-width:600px;
+}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+
+/* photo block */
+.photo{position:relative;height:460px;overflow:hidden}
+.photo img{
+  width:100%;height:100%;object-fit:cover;
+  filter:grayscale(15%) brightness(.8);transition:transform .7s ease,filter .4s;
+}
+.photo:hover img{transform:scale(1.04);filter:grayscale(5%) brightness(.9)}
+.photo-tag{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(10,10,10,.85));
+  padding:32px 20px 16px;
+  font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted-lt);
+}
+
+/* HOW IT WORKS */
+.how-wrap{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.how-inner{max-width:1200px;margin:0 auto;padding:96px 56px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:56px}
+.how-card{
+  background:var(--surface);padding:40px 32px;
+  border-bottom:2px solid transparent;transition:border-color .3s,background .3s;
+}
+.how-card:hover{border-color:var(--red);background:var(--card)}
+.how-num{
+  font-family:'Oswald',sans-serif;font-size:48px;font-weight:700;
+  color:var(--border);line-height:1;margin-bottom:16px;transition:color .3s;
+}
+.how-card:hover .how-num{color:var(--red-dim)}
+.how-title{
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:500;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--cream);margin-bottom:12px;
+}
+.how-body{font-size:13px;font-weight:300;line-height:1.8;color:var(--muted)}
+
+/* INPUTS EXPLAINER — the 7 variables */
+.vars-section{padding:96px 56px;max-width:1200px;margin:0 auto}
+.vars-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--border);margin-top:48px}
+.var-item{
+  background:var(--surface);padding:28px 32px;
+  display:flex;gap:20px;align-items:flex-start;
+  transition:background .25s;
+}
+.var-item:hover{background:var(--card)}
+.var-icon{
+  flex-shrink:0;width:36px;height:36px;background:rgba(232,57,58,.1);
+  border:1px solid rgba(232,57,58,.25);display:flex;align-items:center;
+  justify-content:center;font-size:16px;
+}
+.var-name{
+  font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--cream);margin-bottom:6px;
+}
+.var-desc{font-size:13px;font-weight:300;line-height:1.7;color:var(--muted)}
+
+/* CTA STRIP */
+.cta-strip{
+  background:var(--red);padding:72px 56px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-strip::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    45deg,rgba(255,255,255,.03),rgba(255,255,255,.03) 1px,
+    transparent 1px,transparent 20px
+  );
+}
+.cta-strip h2{
+  font-family:'Oswald',sans-serif;font-size:clamp(36px,5vw,72px);
+  font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:#fff;margin-bottom:10px;position:relative;z-index:1;
+}
+.cta-strip p{
+  color:rgba(255,255,255,.7);font-size:15px;font-weight:300;
+  margin-bottom:32px;position:relative;z-index:1;
+}
+.btn-white{
+  background:#fff;color:var(--red);border:none;
+  padding:16px 44px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:all .25s;position:relative;z-index:1;
+}
+.btn-white:hover{background:var(--cream);transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);padding:28px 56px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--muted);letter-spacing:.5px;
+}
+
+/* ─── PAGE 2 — FORM ──────────────────────── */
+.form-header{
+  padding:140px 56px 52px;background:var(--surface);
+  border-bottom:1px solid var(--border);position:relative;overflow:hidden;
+  text-align:center;
+}
+.form-header::after{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:120px;height:2px;background:var(--red);
+}
+.form-header-tag{
+  font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;
+  color:var(--red);margin-bottom:16px;
+}
+.form-header h1{
+  font-family:'Oswald',sans-serif;font-size:clamp(44px,6vw,80px);
+  font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cream);line-height:.95;
+}
+.form-header p{
+  font-size:14px;font-weight:300;color:rgba(237,235,230,.5);
+  margin-top:18px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7;
+}
+
+/* progress */
+.progress-bar-wrap{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 56px;display:flex;align-items:center;gap:0;overflow-x:auto;
+}
+.prog-step{
+  display:flex;align-items:center;gap:10px;padding:22px 0;
+  font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap;
+}
+.prog-step.done{color:var(--cream)}
+.prog-dot{
+  width:20px;height:20px;border-radius:50%;
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;color:var(--muted);font-family:'Oswald',sans-serif;
+  flex-shrink:0;transition:all .3s;
+}
+.prog-step.done .prog-dot{border-color:var(--red);color:var(--red);background:rgba(232,57,58,.1)}
+.prog-line{flex:1;height:1px;background:var(--border);margin:0 16px;min-width:32px}
+
+/* form body */
+.form-body{max-width:860px;margin:0 auto;padding:56px 56px 80px}
+.back-link{
+  display:inline-flex;align-items:center;gap:8px;
+  color:var(--muted);font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
+  background:none;border:none;cursor:pointer;transition:color .25s;margin-bottom:48px;
+}
+.back-link:hover{color:var(--red)}
+.back-link svg{transition:transform .25s}
+.back-link:hover svg{transform:translateX(-3px)}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+.fg{display:flex;flex-direction:column;gap:8px}
+.fg.span2{grid-column:1/-1}
+
+.fg label{
+  font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--muted);
+}
+.req{color:var(--red);margin-left:2px}
+.fg input,.fg select{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--cream);padding:14px 16px;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:400;
+  outline:none;transition:border-color .25s,box-shadow .25s;
+  appearance:none;-webkit-appearance:none;
+}
+.fg input::placeholder{color:rgba(102,102,102,.5)}
+.fg input:focus,.fg select:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px rgba(232,57,58,.1);
+}
+.fg select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;
+  padding-right:44px;cursor:pointer;
+}
+.fg select option{background:var(--surface);color:var(--cream)}
+.field-hint{font-size:11px;color:rgba(102,102,102,.7);line-height:1.5}
+
+/* section dividers inside form */
+.form-section-label{
+  grid-column:1/-1;
+  font-family:'Oswald',sans-serif;font-size:13px;font-weight:500;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);padding-bottom:12px;
+  border-bottom:1px solid var(--border);margin-top:16px;
+}
+
+.form-footer-row{
+  grid-column:1/-1;display:flex;align-items:center;
+  justify-content:space-between;margin-top:24px;
+  padding-top:28px;border-top:1px solid var(--border);
+}
+.form-note{font-size:12px;color:var(--muted)}
+.btn-predict{
+  background:var(--red);color:#fff;border:none;
+  padding:16px 52px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:all .3s;position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;
+}
+.btn-predict::after{
+  content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);
+  transform:translateX(-100%);transition:.35s ease;
+}
+.btn-predict:hover::after{transform:translateX(0)}
+.btn-predict:hover{background:#c52e2e;transform:translateY(-2px);box-shadow:0 12px 36px rgba(232,57,58,.4)}
+.btn-predict .spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-predict.loading .btn-text{display:none}
+.btn-predict.loading .spinner{display:block}
+
+/* RESULT */
+.result-wrap{
+  display:none;max-width:860px;margin:0 auto 60px;padding:0 56px;
+}
+.result-wrap.show{display:block;animation:fade-in .5s ease}
+@keyframes fade-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.result-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-top:3px solid var(--red);padding:48px;
+  display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;
+}
+.result-gauge{
+  width:160px;height:160px;border-radius:50%;
+  border:3px solid var(--red);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--card);
+  box-shadow:0 0 0 12px rgba(232,57,58,.06),0 0 32px rgba(232,57,58,.2);
+  flex-shrink:0;
+}
+.gauge-num{
+  font-family:'Oswald',sans-serif;font-size:52px;font-weight:700;
+  color:var(--red);line-height:1;
+}
+.gauge-unit{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.result-content h3{
+  font-family:'Oswald',sans-serif;font-size:28px;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--cream);margin-bottom:10px;
+}
+.result-content p{font-size:14px;font-weight:300;line-height:1.8;color:rgba(237,235,230,.6)}
+.result-meta{display:flex;gap:32px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.meta-item{}
+.meta-key{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.meta-val{font-family:'Oswald',sans-serif;font-size:18px;font-weight:500;color:var(--cream)}
+.result-bar-track{height:3px;background:var(--border);margin-top:20px;position:relative}
+.result-bar-fill{height:100%;background:linear-gradient(90deg,var(--red-dim),var(--red));width:0;transition:width 1.6s cubic-bezier(.16,1,.3,1)}
+
+/* error */
+.field-error{border-color:var(--red)!important}
+.error-msg{font-size:11px;color:var(--red);margin-top:4px}
+
+/* animations on scroll */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ── Responsive ──────────────────────────── */
+@media(max-width:900px){
+  nav{padding:16px 20px}
+  .nav-links{display:none}
+  .hero-inner{grid-template-columns:1fr;gap:48px;padding:110px 20px 60px}
+  .gain-meter{width:100%;max-width:340px}
+  .stats{grid-template-columns:1fr 1fr}
+  .section,.vars-section{padding:64px 20px}
+  .two-col{grid-template-columns:1fr;gap:40px}
+  .how-inner{padding:64px 20px}
+  .how-grid{grid-template-columns:1fr}
+  .vars-grid{grid-template-columns:1fr}
+  .cta-strip{padding:56px 20px}
+  footer{padding:24px 20px;flex-direction:column;gap:8px;text-align:center}
+  .form-header{padding:110px 20px 44px}
+  .progress-bar-wrap{padding:0 20px}
+  .form-body{padding:40px 20px 60px}
+  .form-grid{grid-template-columns:1fr}
+  .fg.span2{grid-column:auto}
+  .result-box{grid-template-columns:1fr;text-align:center}
+  .result-gauge{margin:0 auto}
+  .result-wrap{padding:0 20px}
+  .result-meta{flex-wrap:wrap;gap:20px}
+  .form-footer-row{flex-direction:column;gap:16px;align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><div class="logo-dot"></div>StrengthIQ</div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage(1);return false">Home</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#inputs">Variables</a></li>
+  </ul>
+  <button class="nav-btn" onclick="showPage(2)">Predict Now</button>
+</nav>
+
+<!-- ══════════════════════════════
+     PAGE 1
+══════════════════════════════ -->
+<div id="page1">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-tag"><span class="hero-tag-line"></span>ML-powered prediction</div>
+        <h1 class="hero-h1">KNOW YOUR<br><em>GAINS</em><br>BEFORE<br>YOU LIFT</h1>
+        <p class="hero-p">
+          Enter your age, supplement, training weeks, body weight, and goal — our trained machine learning model calculates your exact predicted Strength Gain (%) so you can train with a target, not just a hope.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="showPage(2)">Get My Prediction →</button>
+          <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See How It Works</button>
+        </div>
+      </div>
+
+      <!-- animated demo meter -->
+      <div class="hero-right">
+        <div class="gain-meter">
+          <div class="meter-label">Sample prediction</div>
+          <div class="meter-inputs">
+            <div class="meter-row"><span class="meter-key">Age</span><span class="meter-val">26 yrs</span></div>
+            <div class="meter-row"><span class="meter-key">Gender</span><span class="meter-val">Male</span></div>
+            <div class="meter-row"><span class="meter-key">Supplement</span><span class="meter-val">Creatine</span></div>
+            <div class="meter-row"><span class="meter-key">Weeks</span><span class="meter-val">12 wks</span></div>
+            <div class="meter-row"><span class="meter-key">Initial weight</span><span class="meter-val">72 kg</span></div>
+            <div class="meter-row"><span class="meter-key">Primary benefit</span><span class="meter-val">Strength</span></div>
+            <div class="meter-row"><span class="meter-key">Weight change</span><span class="meter-val">+3.2 kg</span></div>
+          </div>
+          <div class="meter-divider"></div>
+          <div class="meter-output-label">Predicted strength gain</div>
+          <div class="meter-pct" id="hero-pct">0<span>%</span></div>
+          <div class="meter-bar-track"><div class="meter-bar-fill"></div></div>
+          <div class="meter-sub">Based on your 7 training variables</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat reveal">
+      <div class="stat-n">7</div>
+      <div class="stat-l">Input variables</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-n">1</div>
+      <div class="stat-l">Clear output: Strength %</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-n">ML</div>
+      <div class="stat-l">Trained regression model</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-n">&lt;1s</div>
+      <div class="stat-l">Prediction time</div>
+    </div>
+  </div>
+
+  <!-- ABOUT SECTION — body & physique -->
+  <section class="section">
+    <div class="two-col">
+      <div class="reveal">
+        <div class="section-eyebrow">Your body, explained</div>
+        <h2 class="section-h2">STRENGTH IS DATA WEARING MUSCLE</h2>
+        <p class="section-p">
+          Every kilogram you lift is the output of a biological calculation — one that takes in your age, your hormonal environment, the supplements you take, the weeks you've trained, and the weight your body has gained or lost. These aren't random variables. They are the exact inputs that determine how much stronger you'll be next month.
+        </p>
+        <br>
+        <p class="section-p">
+          Your <strong style="color:var(--cream);font-weight:500">initial body weight</strong> sets the baseline for how your frame handles progressive overload. The <strong style="color:var(--cream);font-weight:500">difference in weight</strong> over the training period signals whether your body has been in an anabolic environment — gaining lean mass — or cutting, which shifts the strength trajectory entirely.
+        </p>
+      </div>
+      <div class="photo reveal">
+        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=80" alt="Strength training in gym"/>
+        <div class="photo-tag">Strength is measurable</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="border-top:1px solid var(--border)"></div>
+
+  <!-- SUPPLEMENT SECTION -->
+  <section class="section">
+    <div class="two-col">
+      <div class="photo reveal">
+        <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=900&q=80" alt="Supplements and nutrition"/>
+        <div class="photo-tag">Supplement science</div>
+      </div>
+      <div class="reveal">
+        <div class="section-eyebrow">Supplements & weeks</div>
+        <h2 class="section-h2">THE RIGHT COMPOUND OVER ENOUGH TIME</h2>
+        <p class="section-p">
+          Creatine monohydrate increases phosphocreatine stores in muscle tissue, directly fueling high-intensity contractions and producing measurable strength increases within 3–4 weeks. Protein supplements maintain a positive nitrogen balance when dietary intake falls short. Pre-workouts drive training intensity, indirectly amplifying the stimulus for adaptation.
+        </p>
+        <br>
+        <p class="section-p">
+          But supplements only work over time. Our model accounts for <strong style="color:var(--cream);font-weight:500">training weeks</strong> as a core variable — because 4 weeks of creatine and 16 weeks of creatine produce fundamentally different strength outcomes, and our prediction captures that curve.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-wrap" id="how">
+    <div class="how-inner">
+      <div class="section-eyebrow reveal">How it works</div>
+      <h2 class="section-h2 reveal">THREE STEPS TO YOUR GAIN FORECAST</h2>
+      <div class="how-grid">
+        <div class="how-card reveal">
+          <div class="how-num">01</div>
+          <div class="how-title">Enter your profile</div>
+          <p class="how-body">Fill in 7 fields — your age, gender, supplement used, weeks of training, starting body weight, primary training goal, and the weight difference observed. These are the exact features our model was trained on.</p>
+        </div>
+        <div class="how-card reveal">
+          <div class="how-num">02</div>
+          <div class="how-title">Model runs inference</div>
+          <p class="how-body">Your inputs are sent to a trained ML regression pipeline built on real training data. The model processes your feature vector through learned weights, encoding relationships between supplement type, body weight change, and strength outcomes.</p>
+        </div>
+        <div class="how-card reveal">
+          <div class="how-num">03</div>
+          <div class="how-title">Read your prediction</div>
+          <p class="how-body">You get a single, clear number — your predicted Strength Gain (%). Use it to set a concrete training target, adjust your supplement protocol, or benchmark progress across your next training block.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIABLES EXPLAINER -->
+  <section class="vars-section" id="inputs">
+    <div class="section-eyebrow reveal">The 7 input variables</div>
+    <h2 class="section-h2 reveal">WHAT THE MODEL READS ABOUT YOU</h2>
+    <div class="vars-grid">
+      <div class="var-item reveal">
+        <div class="var-icon">🧬</div>
+        <div>
+          <div class="var-name">Age</div>
+          <p class="var-desc">Hormonal output, recovery capacity, and neuromuscular efficiency all shift with age. Younger trainees typically show higher peak strength gains; the model adjusts baseline expectations accordingly.</p>
+        </div>
+      </div>
+      <div class="var-item reveal">
+        <div class="var-icon">⚧</div>
+        <div>
+          <div class="var-name">Gender</div>
+          <p class="var-desc">Testosterone levels, lean mass baseline, and anabolic response differ by gender. These differences influence the rate and ceiling of strength gain, which the model accounts for in its output.</p>
+        </div>
+      </div>
+      <div class="var-item reveal">
+        <div class="var-icon">💊</div>
+        <div>
+          <div class="var-name">Supplement</div>
+          <p class="var-desc">The type of supplement used — creatine, protein, pre-workout, or none — directly affects strength output. Each compound has a distinct mechanism and magnitude of effect on neuromuscular performance.</p>
+        </div>
+      </div>
+      <div class="var-item reveal">
+        <div class="var-icon">📅</div>
+        <div>
+          <div class="var-name">Weeks</div>
+          <p class="var-desc">Training duration determines how far along the adaptation curve you are. Short blocks produce rapid initial gains; longer durations reflect sustained progressive overload and compound adaptation.</p>
+        </div>
+      </div>
+      <div class="var-item reveal">
+        <div class="var-icon">⚖️</div>
+        <div>
+          <div class="var-name">Initial body weight</div>
+          <p class="var-desc">Your starting body weight sets the absolute load context. Heavier athletes often move more total weight; lighter athletes may show higher relative percentage gains. Both patterns are modelled.</p>
+        </div>
+      </div>
+      <div class="var-item reveal">
+        <div class="var-icon">🎯</div>
+        <div>
+          <div class="var-name">Primary benefit</div>
+          <p class="var-desc">Your stated training goal — muscle gain, fat loss, endurance, or strength — shapes your programming and nutrition, which in turn influences what kind of strength adaptations the body prioritizes.</p>
+        </div>
+      </div>
+      <div class="var-item reveal" style="grid-column:1/-1">
+        <div class="var-icon">📈</div>
+        <div>
+          <div class="var-name">Weight difference found</div>
+          <p class="var-desc">The change in body weight over the training period is a strong proxy for the anabolic environment — net muscle gain, fat loss, or both. A positive weight difference in a strength context typically correlates with higher predicted gains.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIFESTYLE SECTION -->
+  <div style="border-top:1px solid var(--border)"></div>
+  <section class="section">
+    <div class="two-col">
+      <div class="reveal">
+        <div class="section-eyebrow">Beyond the gym</div>
+        <h2 class="section-h2">STRENGTH GROWS WHEN YOU REST</h2>
+        <p class="section-p">
+          The training session is the stimulus. Recovery is where strength actually builds. Muscle protein synthesis peaks in the 24–48 hours after a session, during which sleep, nutrition, and stress management determine whether the body adapts upward or simply repairs.
+        </p>
+        <br>
+        <p class="section-p">
+          Our model captures this through the <strong style="color:var(--cream);font-weight:500">weeks variable</strong> and the <strong style="color:var(--cream);font-weight:500">weight difference</strong> — both of which implicitly encode whether your lifestyle outside the gym is supporting the work you're doing inside it. A 12-week block with consistent weight gain tells a very different story than 12 weeks at the same weight.
+        </p>
+      </div>
+      <div class="photo reveal">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80" alt="Healthy recovery lifestyle"/>
+        <div class="photo-tag">Recovery drives results</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-strip">
+    <h2>WHAT'S YOUR NUMBER?</h2>
+    <p>7 inputs. One prediction. Know your Strength Gain (%) before you start your next block.</p>
+    <button class="btn-white" onclick="showPage(2)">Predict My Strength Gains →</button>
+  </div>
+
+  <footer>
+    <div class="logo" style="font-size:17px"><div class="logo-dot"></div>StrengthIQ</div>
+    <span>Predictions powered by a trained ML regression model</span>
+    <span>© 2026 Armaan Altaf Jakati</span>
+  </footer>
+
+</div><!-- /page1 -->
+
+<!-- ══════════════════════════════
+     PAGE 2 — FORM
+══════════════════════════════ -->
+<div id="page2">
+
+  <div class="form-header">
+    <div class="form-header-tag">Strength Gain Predictor</div>
+    <h1>PREDICT YOUR<br><span style="color:var(--red)">STRENGTH GAIN</span></h1>
+    <p>Fill in all 7 variables below. The model will return your predicted Strength Gain (%) based on your exact training profile.</p>
+  </div>
+
+  <!-- progress indicator -->
+  <div class="progress-bar-wrap">
+    <div class="prog-step done"><div class="prog-dot">1</div>Personal</div>
+    <div class="prog-line"></div>
+    <div class="prog-step done"><div class="prog-dot">2</div>Supplement</div>
+    <div class="prog-line"></div>
+    <div class="prog-step done"><div class="prog-dot">3</div>Training</div>
+    <div class="prog-line"></div>
+    <div class="prog-step done"><div class="prog-dot">4</div>Body</div>
+    <div class="prog-line"></div>
+    <div class="prog-step" id="step5"><div class="prog-dot">5</div>Result</div>
+  </div>
+
+  <div class="form-body">
+    <button class="back-link" onclick="showPage(1)">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to home
+    </button>
+
+    <form id="predictForm" novalidate onsubmit="handlePredict(event)">
+      <div class="form-grid">
+
+        <!-- Section: Personal -->
+        <div class="form-section-label">Personal details</div>
+
+        <!-- Age -->
+        <div class="fg">
+          <label for="f-age">Age<span class="req">*</span></label>
+          <input type="number" id="f-age" name="Age" placeholder="e.g. 25" min="14" max="80" required/>
+          <span class="field-hint">Your current age in years</span>
+        </div>
+
+        <!-- Gender -->
+        <div class="fg">
+          <label for="f-gender">Gender<span class="req">*</span></label>
+          <select id="f-gender" name="Gender" required>
+            <option value="" disabled selected>Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Non-Binary">Non-Binary</option>
+          </select>
+          <span class="field-hint">As used in the training dataset</span>
+        </div>
+
+        <!-- Section: Supplement -->
+        <div class="form-section-label">Supplement</div>
+
+        <!-- Supplement -->
+        <div class="fg span2">
+          <label for="f-supp">Supplement used<span class="req">*</span></label>
+          <select id="f-supp" name="Supplement" required>
+            <option value="" disabled selected>Select supplement</option>
+            <option value="Mass Gainer">Mass Gainer</option>
+            <option value="Creatine Monohydrate">Creatine Monohydrate</option>
+            <option value="Both">Both</option>
+          </select>
+          <span class="field-hint">Primary supplement taken during the training period</span>
+        </div>
+
+        <!-- Section: Training -->
+        <div class="form-section-label">Training period</div>
+
+        <!-- Weeks -->
+        <div class="fg">
+          <label for="f-weeks">Training weeks<span class="req">*</span></label>
+          <input type="number" id="f-weeks" name="Weeks" placeholder="e.g. 12" min="1" max="104" required/>
+          <span class="field-hint">Total weeks of the training block</span>
+        </div>
+
+        <!-- Primary Benefit -->
+        <div class="fg">
+          <label for="f-benefit">Primary benefit<span class="req">*</span></label>
+          <select id="f-benefit" name="Primary_Benefit" required>
+            <option value="" disabled selected>Select goal</option>
+            <option value="Cognitive Support">Cognitive Support</option>
+            <option value="Weight Gain">Weight Gain</option>
+            <option value="Strength Gain">Strength Gain</option>
+            <option value="Muscle Recovery">Muscle Recovery</option>
+            <option value="Bone Density">Bone Density</option>
+          </select>
+          <span class="field-hint">Your primary training goal during this period</span>
+        </div>
+
+        <!-- Section: Body -->
+        <div class="form-section-label">Body weight data</div>
+
+        <!-- Initial WT -->
+        <div class="fg">
+          <label for="f-initwt">Initial body weight (kg)<span class="req">*</span></label>
+          <input type="number" id="f-initwt" name="Initial_WT" placeholder="e.g. 72.5" min="30" max="250" step="0.1" required/>
+          <span class="field-hint">Body weight at the start of the training block</span>
+        </div>
+
+        <!-- Difference in WT -->
+        <div class="fg">
+          <label for="f-diffwt">Weight difference found (kg)<span class="req">*</span></label>
+          <input type="number" id="f-diffwt" name="difference_found_in_WT" placeholder="e.g. +3.2 or -1.5" step="0.1" required/>
+          <span class="field-hint">Change in body weight over the training period (use – for weight loss)</span>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-footer-row">
+          <span class="form-note">All 7 fields required <span class="req">*</span></span>
+          <button type="submit" class="btn-predict" id="predictBtn">
+            <span class="btn-text">Predict Strength Gain →</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-box">
+      <div class="result-gauge">
+        <div class="gauge-num" id="res-num">—</div>
+        <div class="gauge-unit">% Gain</div>
+      </div>
+      <div class="result-content">
+        <h3 id="res-title">Strength Gain Forecast</h3>
+        <p id="res-msg">Your predicted strength gain based on your 7-variable training profile.</p>
+        <div class="result-meta">
+          <div class="meta-item">
+            <div class="meta-key">Supplement</div>
+            <div class="meta-val" id="res-supp">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-key">Training weeks</div>
+            <div class="meta-val" id="res-weeks">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-key">Weight change</div>
+            <div class="meta-val" id="res-wt">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-key">Primary goal</div>
+            <div class="meta-val" id="res-goal">—</div>
+          </div>
+        </div>
+        <div class="result-bar-track">
+          <div class="result-bar-fill" id="res-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="logo" style="font-size:17px"><div class="logo-dot"></div>StrengthIQ</div>
+    <span>© 2026 Armaan Altaf Jakati</span>
+  </footer>
+
+</div><!-- /page2 -->
+
+<script>
+/* ── page switch ── */
+function showPage(n){
+  document.getElementById('page1').style.display = n===1 ? 'block' : 'none';
+  document.getElementById('page2').style.display = n===2 ? 'block' : 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── hero counter animation ── */
+let heroAnimated = false;
+function animateHeroPct(){
+  if(heroAnimated) return;
+  heroAnimated = true;
+  const el = document.getElementById('hero-pct');
+  let v = 0; const target = 72;
+  const step = () => {
+    v = Math.min(v + 1.2, target);
+    el.innerHTML = Math.round(v) + '<span>%</span>';
+    if(v < target) requestAnimationFrame(step);
+  };
+  setTimeout(step, 1200);
+}
+animateHeroPct();
+
+/* ── scroll reveals ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ── form validation & prediction ── */
+function handlePredict(e){
+  e.preventDefault();
+  const form = e.target;
+  let valid = true;
+
+  // clear previous errors
+  form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+  form.querySelectorAll('.error-msg').forEach(el => el.remove());
+
+  const fields = ['f-age','f-gender','f-supp','f-weeks','f-benefit','f-initwt','f-diffwt'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el.value || el.value === ''){
+      el.classList.add('field-error');
+      const msg = document.createElement('span');
+      msg.className = 'error-msg';
+      msg.textContent = 'This field is required';
+      el.parentNode.appendChild(msg);
+      valid = false;
+    }
+  });
+
+  if(!valid) return;
+
+  // collect inputs
+  const data = {
+    Age: parseInt(document.getElementById('f-age').value),
+    Gender: document.getElementById('f-gender').value,
+    Supplement: document.getElementById('f-supp').value,
+    Weeks: parseInt(document.getElementById('f-weeks').value),
+    Initial_WT: parseFloat(document.getElementById('f-initwt').value),
+    Primary_Benefit: document.getElementById('f-benefit').value,
+    difference_found_in_WT: parseFloat(document.getElementById('f-diffwt').value)
+  };
+
+  const btn = document.getElementById('predictBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  fetch('/predict', {
+       method: 'POST',
+       headers: {'Content-Type':'application/json'},
+       body: JSON.stringify(data)
+     })
+     .then(r => r.json())
+     .then(result => showResult(result.Strength_Gain_pct, data))
+     .catch(() => alert('Prediction failed. Check your API.'))
+     .finally(() => { btn.classList.remove('loading'); btn.disabled=false; });
+}
+
+
+function showResult(pct, data){
+  document.getElementById('step5').classList.add('done');
+  document.getElementById('res-supp').textContent = data.Supplement;
+  document.getElementById('res-weeks').textContent = data.Weeks + ' wks';
+  document.getElementById('res-wt').textContent = (data.difference_found_in_WT > 0 ? '+' : '') + data.difference_found_in_WT + ' kg';
+  document.getElementById('res-goal').textContent = data.Primary_Benefit;
+
+  const tier = pct >= 20 ? 'Exceptional' : pct >= 12 ? 'Strong' : pct >= 6 ? 'Steady' : 'Moderate';
+  document.getElementById('res-title').textContent = tier + ' Strength Gain Predicted';
+  document.getElementById('res-msg').textContent =
+    `Based on your ${data.Weeks}-week training block with ${data.Supplement}, targeting ${data.Primary_Benefit}, ` +
+    `and a body weight change of ${data.difference_found_in_WT > 0 ? '+' : ''}${data.difference_found_in_WT} kg — ` +
+    `the model predicts a ${pct}% strength gain.`;
+
+  const wrap = document.getElementById('resultWrap');
+  wrap.classList.add('show');
+  wrap.scrollIntoView({behavior:'smooth', block:'center'});
+
+  // animate number
+  let cur = 0;
+  const el = document.getElementById('res-num');
+  const step = () => {
+    cur = Math.min(cur + 0.5, pct);
+    el.textContent = cur.toFixed(1);
+    if(cur < pct) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+
+  // animate bar (cap at 100%, scale pct/50 so 50% = full bar)
+  setTimeout(() => {
+    document.getElementById('res-bar').style.width = Math.min(100, (pct/50)*100) + '%';
+  }, 300);
+}
+</script>
+</body>
+</html>
