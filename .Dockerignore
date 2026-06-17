@@ -1,0 +1,4 @@
+__pycache__/
+venv
+ml_py_script.py 
+strength-gain-predictor.ipynb
